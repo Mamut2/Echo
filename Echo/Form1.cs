@@ -19,19 +19,19 @@ namespace Echo
             InitializeComponent();
             client = new Client(13000);
             client.PacketReceived += OnPacketReceived;
+            client.Disconnected += OnDisconnected;
             FormClosed += (s, e) => client.Disconnect();
         }
 
-        string username = "User";
-        Color user_color = Color.Blue;
+        string username = "";
+        Color user_color = Color.AliceBlue;
 
-        private void chat_box_KeyDown(object sender, KeyEventArgs e)
+        private void chat_box_KeyDown(object sender, KeyEventArgs args)
         {
-            if (e.KeyCode == Keys.Enter)
+            if (args.KeyCode == Keys.Enter)
             {
-                e.SuppressKeyPress = true;
+                args.SuppressKeyPress = true;
                 string message = chat_box.Text;
-                AddMessage(username + ":" + message, user_color);
                 client.SendPacket(message, PacketType.Text);
             }
         }
@@ -46,40 +46,39 @@ namespace Echo
             message_box.BorderStyle = BorderStyle.None;
             message_box.BackColor = Color.White;
             message_box.Text = message;
-            message_box.SelectionStart = 0;
-            message_box.SelectionLength = username.Length;
-            message_box.SelectionColor = color;
             message_box.Height = (int)message_box.CreateGraphics().MeasureString(message, message_box.Font, message_box.Width).Height + 10;
             message_box.Margin = new Padding(0, 0, 0, 0);
 
             message_panel.Controls.Add(message_box);
+            message_panel.ScrollControlIntoView(message_box);
 
             chat_box.Clear();
         }
 
-        void OnPacketReceived(object source, EventArgs args)
-        {
-            
-        }
-
         private void connectbtn_Click(object sender, EventArgs e)
         {
-            Task.Run( () =>
+            _ = Task.Run( () =>
             {
-                connectbtn.Invoke(new MethodInvoker(delegate { connectbtn.Enabled = false;  }));
+                connectbtn.Invoke(new MethodInvoker(delegate { connectbtn.Enabled = false; }));
                 if (client.Connected)
                 {
                     client.Disconnect();
-                    connectbtn.Text = "Connect";
                 }
                 else
                 {
                     if (usernametxt.Text.Length > 0)
                     {
+                        pickColorBtn.Invoke(new MethodInvoker(delegate { pickColorBtn.Enabled = false; }));
                         username = usernametxt.Text;
                         var succes = Task.Run(async () => await client.StartClient(username));
                         if (succes.Result)
-                            connectbtn.Text = "Disconnect";
+                        {
+                            connectbtn.Invoke(new MethodInvoker(delegate { connectbtn.Text = "Disconnect"; }));
+                        }
+                        else
+                        {
+                            pickColorBtn.Invoke(new MethodInvoker(delegate { pickColorBtn.Enabled = true; }));
+                        }
                     }
                     else
                     {
@@ -88,6 +87,33 @@ namespace Echo
                 }
                 connectbtn.Invoke(new MethodInvoker(delegate { connectbtn.Enabled = true; }));
             });
+        }
+
+        void OnPacketReceived(object source, PacketArgs args)
+        {
+            if(args.packetType == PacketType.Text)
+            {
+                message_panel.Invoke(new MethodInvoker( delegate { 
+                    AddMessage(client.users[args.fromId].username + ": " + args.data, Color.AliceBlue); 
+                }));
+            }
+        }
+
+        void OnDisconnected(object source, EventArgs args)
+        {
+            if(connectbtn.InvokeRequired)
+                connectbtn.Invoke(new MethodInvoker(delegate { connectbtn.Text = "Connect"; pickColorBtn.Enabled = true;  }));
+            else
+            {
+                pickColorBtn.Enabled = true;
+                connectbtn.Text = "Connect";
+            }
+        }
+
+        private void pickColorBtn_Click(object sender, EventArgs e)
+        {
+            colorDialog1.ShowDialog();
+            user_color = colorDialog1.Color;
         }
     }
 }

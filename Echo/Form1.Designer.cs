@@ -29,10 +29,12 @@
         private void InitializeComponent()
         {
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.pickColorBtn = new System.Windows.Forms.Button();
             this.connectbtn = new System.Windows.Forms.Button();
             this.usernametxt = new System.Windows.Forms.TextBox();
             this.message_panel = new System.Windows.Forms.FlowLayoutPanel();
             this.chat_box = new System.Windows.Forms.TextBox();
+            this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -47,6 +49,7 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.pickColorBtn);
             this.splitContainer1.Panel1.Controls.Add(this.connectbtn);
             this.splitContainer1.Panel1.Controls.Add(this.usernametxt);
             // 
@@ -59,10 +62,21 @@
             this.splitContainer1.SplitterDistance = 237;
             this.splitContainer1.TabIndex = 0;
             // 
+            // pickColorBtn
+            // 
+            this.pickColorBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.pickColorBtn.Location = new System.Drawing.Point(13, 143);
+            this.pickColorBtn.Name = "pickColorBtn";
+            this.pickColorBtn.Size = new System.Drawing.Size(202, 47);
+            this.pickColorBtn.TabIndex = 2;
+            this.pickColorBtn.Text = "Pick color";
+            this.pickColorBtn.UseVisualStyleBackColor = true;
+            this.pickColorBtn.Click += new System.EventHandler(this.pickColorBtn_Click);
+            // 
             // connectbtn
             // 
             this.connectbtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.connectbtn.Location = new System.Drawing.Point(13, 67);
+            this.connectbtn.Location = new System.Drawing.Point(13, 70);
             this.connectbtn.Name = "connectbtn";
             this.connectbtn.Size = new System.Drawing.Size(202, 47);
             this.connectbtn.TabIndex = 1;
@@ -80,6 +94,7 @@
             // 
             // message_panel
             // 
+            this.message_panel.AutoScroll = true;
             this.message_panel.Location = new System.Drawing.Point(30, 12);
             this.message_panel.Name = "message_panel";
             this.message_panel.Size = new System.Drawing.Size(719, 470);
@@ -119,6 +134,8 @@
         private System.Windows.Forms.FlowLayoutPanel message_panel;
         private System.Windows.Forms.TextBox usernametxt;
         private System.Windows.Forms.Button connectbtn;
+        private System.Windows.Forms.ColorDialog colorDialog1;
+        private System.Windows.Forms.Button pickColorBtn;
     }
 }
 

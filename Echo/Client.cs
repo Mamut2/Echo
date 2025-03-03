@@ -7,31 +7,44 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Windows.Forms;
+using System.Security.Cryptography;
+using Echo;
+using System.ComponentModel;
 
 namespace Echo
 {
     public enum PacketType
     {
-        Text = 0,
-        Disconnect = 1,
-        Connect = 2
+        Empty = 0,
+        Text = 1,
+        Disconnect = 2,
+        Connect = 3,
+        AssignId = 4
+    }
+
+    class User
+    {
+        public string username = "";
     }
 
     class Client
     {
-
+        const int MAX_USERS = 5;
         TcpClient tcp;
-        int port;
+        int port, id;
+        public User[] users = new User[MAX_USERS];
 
         public bool Connected
         {
             get { return tcp.Connected; }
         }
 
-        public event EventHandler PacketReceived;
+        public event EventHandler<PacketArgs> PacketReceived;
+        public event EventHandler Disconnected;
 
         public Client(int port)
         {
+            for (int i = 0; i < MAX_USERS; i++) users[i] = new User();
             this.port = port;
             tcp = new TcpClient();
         }
@@ -53,49 +66,97 @@ namespace Echo
             {
                 tcp.EndConnect(result);
                 SendPacket(username, PacketType.Connect);
-                _ = Task.Run(async () => await ReceivePackets());
+                _ = Task.Run(() => ReceivePackets());
             }
             return Task.FromResult(succes);
         }
 
-        public void SendPacket(string data, PacketType type)
+        public void SendPacket(string data, PacketType packetType)
         {
-            if (Connected)
+            try
             {
-                NetworkStream stream = tcp.GetStream();
-                Byte[] bytes = Encoding.ASCII.GetBytes(((int)type).ToString() + data);
-                stream.Write(bytes, 0, bytes.Length);
+                if (Connected)
+                {
+                    NetworkStream stream = tcp.GetStream();
+
+                    string pt = ((int)packetType).ToString();
+
+                    data = pt + '|' + id + '|' + data;
+                    Byte[] bytes = Encoding.ASCII.GetBytes(data);
+                    stream.Write(bytes, 0, bytes.Length);
+                }
             }
+            catch (Exception e) { Console.WriteLine(e.Message); Disconnect(); }
         }
 
-        async Task ReceivePackets()
+        void ReceivePackets()
         {
             NetworkStream stream = tcp.GetStream();
-            StreamReader reader = new StreamReader(stream);
+            Byte[] bytes = new Byte[256];
+            string data = null;
             while (Connected)
             {
                 if (tcp.Available > 0)
                 {
-                    string message = await reader.ReadLineAsync();
-                    OnPacketReceived();
+                    int i = stream.Read(bytes, 0, bytes.Length), fromId;
+                    PacketType packetType = PacketType.Empty;
+                    data = Encoding.ASCII.GetString(bytes, 0, i);
+
+                    string[] p = data.Split('|');
+                    packetType = (PacketType)int.Parse(p[0]);
+                    fromId = int.Parse(p[1]);
+                    data = "";
+                    for (int k = 2; k < p.Length; k++) data += p[k];
+
+                    switch (packetType)
+                    {
+                        case PacketType.Text:
+                            break;
+                        case PacketType.Disconnect:
+                            Disconnect();
+                            break;
+                        case PacketType.Connect:
+                            users[fromId].username = data;
+                            break;
+                        case PacketType.AssignId:
+                            this.id = fromId;
+                            break;
+                    }
+                    OnPacketReceived(new PacketArgs(packetType, data, fromId));
                 }
-                System.Threading.Thread.Sleep(100);
             }
         }
 
         public void Disconnect()
         {
-            if(Connected)
-            {
-                SendPacket(null, PacketType.Disconnect);
-                tcp.Close();
-                tcp = new TcpClient();
-            }
+            SendPacket(null, PacketType.Disconnect);
+            tcp.Close();
+            tcp = new TcpClient();
+            OnDisconnected();
         }
 
-        protected virtual void OnPacketReceived()
+        void OnDisconnected()
         {
-            PacketReceived?.Invoke(this, EventArgs.Empty);
+            Disconnected?.Invoke(this, EventArgs.Empty);
         }
+
+        void OnPacketReceived(PacketArgs args)
+        {
+            PacketReceived?.Invoke(this, args);
+        }
+    }
+}
+
+public class PacketArgs : EventArgs
+{
+    public PacketType packetType;
+    public string data;
+    public int fromId;
+
+    public PacketArgs(PacketType packetType, string data, int fromId)
+    {
+        this.packetType = packetType;
+        this.data = data;
+        this.fromId = fromId;
     }
 }
