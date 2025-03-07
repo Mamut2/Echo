@@ -52,7 +52,7 @@ namespace Echo
         public Task<bool> StartClient(string username)
         {
             tcp = new TcpClient();
-            var result = tcp.BeginConnect(IPAddress.Loopback, port, null, null);
+            var result = tcp.BeginConnect(Dns.GetHostAddresses("0.tcp.eu.ngrok.io"), 12308, null, null);
             var succes = result.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(5));
 
             if (!succes || !tcp.Connected)

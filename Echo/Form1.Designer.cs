@@ -35,10 +35,13 @@
             this.message_panel = new System.Windows.Forms.FlowLayoutPanel();
             this.chat_box = new System.Windows.Forms.TextBox();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
+            this.pfpImage = new System.Windows.Forms.PictureBox();
+            this.change_pfp_btn = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pfpImage)).BeginInit();
             this.SuspendLayout();
             // 
             // splitContainer1
@@ -49,6 +52,8 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.change_pfp_btn);
+            this.splitContainer1.Panel1.Controls.Add(this.pfpImage);
             this.splitContainer1.Panel1.Controls.Add(this.pickColorBtn);
             this.splitContainer1.Panel1.Controls.Add(this.connectbtn);
             this.splitContainer1.Panel1.Controls.Add(this.usernametxt);
@@ -109,6 +114,25 @@
             this.chat_box.TabIndex = 0;
             this.chat_box.KeyDown += new System.Windows.Forms.KeyEventHandler(this.chat_box_KeyDown);
             // 
+            // pfpImage
+            // 
+            this.pfpImage.Location = new System.Drawing.Point(13, 216);
+            this.pfpImage.Name = "pfpImage";
+            this.pfpImage.Size = new System.Drawing.Size(200, 200);
+            this.pfpImage.TabIndex = 3;
+            this.pfpImage.TabStop = false;
+            // 
+            // change_pfp_btn
+            // 
+            this.change_pfp_btn.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.change_pfp_btn.Location = new System.Drawing.Point(11, 435);
+            this.change_pfp_btn.Name = "change_pfp_btn";
+            this.change_pfp_btn.Size = new System.Drawing.Size(202, 47);
+            this.change_pfp_btn.TabIndex = 4;
+            this.change_pfp_btn.Text = "Change pfp";
+            this.change_pfp_btn.UseVisualStyleBackColor = true;
+            this.change_pfp_btn.Click += new System.EventHandler(this.change_pfp_btn_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -123,6 +147,7 @@
             this.splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pfpImage)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -136,6 +161,8 @@
         private System.Windows.Forms.Button connectbtn;
         private System.Windows.Forms.ColorDialog colorDialog1;
         private System.Windows.Forms.Button pickColorBtn;
+        private System.Windows.Forms.Button change_pfp_btn;
+        private System.Windows.Forms.PictureBox pfpImage;
     }
 }
 
