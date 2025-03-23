@@ -29,14 +29,14 @@
         private void InitializeComponent()
         {
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.change_pfp_btn = new System.Windows.Forms.Button();
+            this.pfpImage = new System.Windows.Forms.PictureBox();
             this.pickColorBtn = new System.Windows.Forms.Button();
             this.connectbtn = new System.Windows.Forms.Button();
             this.usernametxt = new System.Windows.Forms.TextBox();
-            this.message_panel = new System.Windows.Forms.FlowLayoutPanel();
+            this.lstMessages = new System.Windows.Forms.ListBox();
             this.chat_box = new System.Windows.Forms.TextBox();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
-            this.pfpImage = new System.Windows.Forms.PictureBox();
-            this.change_pfp_btn = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -61,11 +61,30 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.BackColor = System.Drawing.SystemColors.Control;
-            this.splitContainer1.Panel2.Controls.Add(this.message_panel);
+            this.splitContainer1.Panel2.Controls.Add(this.lstMessages);
             this.splitContainer1.Panel2.Controls.Add(this.chat_box);
             this.splitContainer1.Size = new System.Drawing.Size(1017, 578);
             this.splitContainer1.SplitterDistance = 237;
             this.splitContainer1.TabIndex = 0;
+            // 
+            // change_pfp_btn
+            // 
+            this.change_pfp_btn.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.change_pfp_btn.Location = new System.Drawing.Point(11, 435);
+            this.change_pfp_btn.Name = "change_pfp_btn";
+            this.change_pfp_btn.Size = new System.Drawing.Size(202, 47);
+            this.change_pfp_btn.TabIndex = 4;
+            this.change_pfp_btn.Text = "Change pfp";
+            this.change_pfp_btn.UseVisualStyleBackColor = true;
+            this.change_pfp_btn.Click += new System.EventHandler(this.change_pfp_btn_Click);
+            // 
+            // pfpImage
+            // 
+            this.pfpImage.Location = new System.Drawing.Point(13, 216);
+            this.pfpImage.Name = "pfpImage";
+            this.pfpImage.Size = new System.Drawing.Size(200, 200);
+            this.pfpImage.TabIndex = 3;
+            this.pfpImage.TabStop = false;
             // 
             // pickColorBtn
             // 
@@ -76,7 +95,6 @@
             this.pickColorBtn.TabIndex = 2;
             this.pickColorBtn.Text = "Pick color";
             this.pickColorBtn.UseVisualStyleBackColor = true;
-            this.pickColorBtn.Click += new System.EventHandler(this.pickColorBtn_Click);
             // 
             // connectbtn
             // 
@@ -97,13 +115,13 @@
             this.usernametxt.Size = new System.Drawing.Size(202, 38);
             this.usernametxt.TabIndex = 0;
             // 
-            // message_panel
+            // lstMessages
             // 
-            this.message_panel.AutoScroll = true;
-            this.message_panel.Location = new System.Drawing.Point(30, 12);
-            this.message_panel.Name = "message_panel";
-            this.message_panel.Size = new System.Drawing.Size(719, 470);
-            this.message_panel.TabIndex = 1;
+            this.lstMessages.FormattingEnabled = true;
+            this.lstMessages.Location = new System.Drawing.Point(30, 20);
+            this.lstMessages.Name = "lstMessages";
+            this.lstMessages.Size = new System.Drawing.Size(719, 459);
+            this.lstMessages.TabIndex = 1;
             // 
             // chat_box
             // 
@@ -113,25 +131,6 @@
             this.chat_box.Size = new System.Drawing.Size(719, 54);
             this.chat_box.TabIndex = 0;
             this.chat_box.KeyDown += new System.Windows.Forms.KeyEventHandler(this.chat_box_KeyDown);
-            // 
-            // pfpImage
-            // 
-            this.pfpImage.Location = new System.Drawing.Point(13, 216);
-            this.pfpImage.Name = "pfpImage";
-            this.pfpImage.Size = new System.Drawing.Size(200, 200);
-            this.pfpImage.TabIndex = 3;
-            this.pfpImage.TabStop = false;
-            // 
-            // change_pfp_btn
-            // 
-            this.change_pfp_btn.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.change_pfp_btn.Location = new System.Drawing.Point(11, 435);
-            this.change_pfp_btn.Name = "change_pfp_btn";
-            this.change_pfp_btn.Size = new System.Drawing.Size(202, 47);
-            this.change_pfp_btn.TabIndex = 4;
-            this.change_pfp_btn.Text = "Change pfp";
-            this.change_pfp_btn.UseVisualStyleBackColor = true;
-            this.change_pfp_btn.Click += new System.EventHandler(this.change_pfp_btn_Click);
             // 
             // Form1
             // 
@@ -156,13 +155,13 @@
 
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.TextBox chat_box;
-        private System.Windows.Forms.FlowLayoutPanel message_panel;
         private System.Windows.Forms.TextBox usernametxt;
         private System.Windows.Forms.Button connectbtn;
         private System.Windows.Forms.ColorDialog colorDialog1;
         private System.Windows.Forms.Button pickColorBtn;
         private System.Windows.Forms.Button change_pfp_btn;
         private System.Windows.Forms.PictureBox pfpImage;
+        private System.Windows.Forms.ListBox lstMessages;
     }
 }
 
