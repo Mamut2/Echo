@@ -55,8 +55,10 @@ namespace Echo
         string localUsername;
         byte[] localAvatar;
         bool isConnected;
-        const int port = 13000;
+        const int port = 19083;
         ConcurrentDictionary<string, ClientInfo> clients = new ConcurrentDictionary<string, ClientInfo>();
+
+        VoipNode voip = new VoipNode(port + 1);
 
         void SetupUI()
         {
@@ -82,7 +84,7 @@ namespace Echo
             try
             {
                 client = new TcpClient();
-                client.Connect(IPAddress.Loopback, port);
+                client.Connect(Dns.GetHostAddresses("0.tcp.eu.ngrok.io"), port);
                 stream = client.GetStream();
                 isConnected = true;
                 localUsername = usernametxt.Text;
@@ -96,9 +98,12 @@ namespace Echo
                     SendPacket(PacketType.UserInfo, ms.ToArray());
                 }
 
+
                 AddSystemMessage("Connected to server");
                 new Thread(ReceiveLoop) { IsBackground = true }.Start();
                 UpdateUI(() => connectbtn.Enabled = false);
+
+                voip.Start();
             }
             catch
             {
@@ -148,7 +153,10 @@ namespace Echo
                         string senderId = reader.ReadString();
                         string username = reader.ReadString();
                         byte[] avatar = reader.ReadBytes(reader.ReadInt32());
+                        string ip = reader.ReadString();
                         clients[senderId] = new ClientInfo(username, avatar);
+
+                        voip.ConnectToPeer(IPAddress.Parse(ip), port + 1);
                     }
                     break;
 

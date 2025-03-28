@@ -80,6 +80,8 @@
             // 
             // pfpImage
             // 
+            this.pfpImage.BackColor = System.Drawing.Color.White;
+            this.pfpImage.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pfpImage.Location = new System.Drawing.Point(13, 216);
             this.pfpImage.Name = "pfpImage";
             this.pfpImage.Size = new System.Drawing.Size(200, 200);
