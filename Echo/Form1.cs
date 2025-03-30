@@ -55,59 +55,86 @@ namespace Echo
         string localUsername;
         byte[] localAvatar;
         bool isConnected;
-        const int port = 19083;
+        const int port = 13000;
         ConcurrentDictionary<string, ClientInfo> clients = new ConcurrentDictionary<string, ClientInfo>();
 
-        VoipNode voip = new VoipNode(port + 1);
+        VoipNode voip;
 
         void SetupUI()
         {
+            // Tab control
+            tabControl.Appearance = TabAppearance.FlatButtons;
+            tabControl.ItemSize = new Size(0, 1);
+            tabControl.SizeMode = TabSizeMode.Fixed;
+            tabControl.SelectedTab = loginTabPage;
+
+            // Message list
             lstMessages.DrawMode = DrawMode.OwnerDrawVariable;
             lstMessages.DrawItem += DrawMessageItem;
             lstMessages.MeasureItem += (s, e) => e.ItemHeight = 60;
+
+            // Users list
+            lstUsers.DrawMode = DrawMode.OwnerDrawVariable;
+            lstUsers.DrawItem += DrawUserItem;
+            lstUsers.MeasureItem += (s, e) => e.ItemHeight = 60;
         }
 
         private void connectbtn_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(usernametxt.Text))
-            {
-                MessageBox.Show("Username required");
-                return;
-            }
-
-            if (pfpImage.Image == null)
-            {
-                MessageBox.Show("Profile image required");
-                return;
-            }
-
-            try
-            {
-                client = new TcpClient();
-                client.Connect(Dns.GetHostAddresses("0.tcp.eu.ngrok.io"), port);
-                stream = client.GetStream();
-                isConnected = true;
-                localUsername = usernametxt.Text;
-
-                using (MemoryStream ms = new MemoryStream())
-                using (BinaryWriter writer = new BinaryWriter(ms))
-                {
-                    writer.Write(localUsername);
-                    writer.Write(localAvatar.Length);
-                    writer.Write(localAvatar);
-                    SendPacket(PacketType.UserInfo, ms.ToArray());
-                }
-
-
-                AddSystemMessage("Connected to server");
-                new Thread(ReceiveLoop) { IsBackground = true }.Start();
-                UpdateUI(() => connectbtn.Enabled = false);
-
-                voip.Start();
-            }
-            catch
+            if (isConnected)
             {
                 Disconnect();
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(usernametxt.Text))
+                {
+                    MessageBox.Show("Username required");
+                    return;
+                }
+
+                if (pfpImage.Image == null)
+                {
+                    MessageBox.Show("Profile image required");
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(ipInput.Text))
+                {
+                    MessageBox.Show("Server ip required");
+                    return;
+                }
+
+                try
+                {
+                    client = new TcpClient();
+                    client.Connect(IPAddress.Parse(ipInput.Text), port);
+                    stream = client.GetStream();
+                    isConnected = true;
+                    localUsername = usernametxt.Text;
+
+                    using (MemoryStream ms = new MemoryStream())
+                    using (BinaryWriter writer = new BinaryWriter(ms))
+                    {
+                        writer.Write(localUsername);
+                        writer.Write(localAvatar.Length);
+                        writer.Write(localAvatar);
+                        SendPacket(PacketType.UserInfo, ms.ToArray());
+                    }
+
+
+                    AddSystemMessage("Connected to server");
+                    new Thread(ReceiveLoop) { IsBackground = true }.Start();
+                    UpdateUI(() => connectbtn.Text = "Disconnect");
+
+                    voip = new VoipNode(port + 1);
+                    voip.Start();
+                    voip.LogMessage += (string msg) => { Console.WriteLine(msg); };
+                }
+                catch
+                {
+                    Disconnect();
+                }
             }
         }
 
@@ -154,9 +181,12 @@ namespace Echo
                         string username = reader.ReadString();
                         byte[] avatar = reader.ReadBytes(reader.ReadInt32());
                         string ip = reader.ReadString();
-                        clients[senderId] = new ClientInfo(username, avatar);
+                        bool isMine = reader.ReadBoolean();
 
-                        voip.ConnectToPeer(IPAddress.Parse(ip), port + 1);
+                        clients[senderId] = new ClientInfo(username, avatar);
+                        if(!isMine) voip.ConnectToPeer(IPAddress.Parse(ip), port + 1);
+
+                        AddUserToList(senderId);
                     }
                     break;
 
@@ -226,6 +256,7 @@ namespace Echo
         void OnClientDisconnected(string senderId)
         {
             AddSystemMessage($"{clients[senderId].username} disconnected");
+            RemoveUserFromList(senderId);
             //clients.TryRemove(senderId, out ClientInfo _);
         }
 
@@ -234,9 +265,11 @@ namespace Echo
             if (!isConnected) return;
 
             isConnected = false;
+
             UpdateUI(() =>
             {
-                connectbtn.Enabled = true;
+                lstUsers.Items.Clear();
+                connectbtn.Text = "Connect";
                 AddSystemMessage("Disconnected from server");
             });
 
@@ -244,6 +277,7 @@ namespace Echo
             {
                 stream?.Close();
                 client?.Close();
+                voip.Dispose();
             }
             catch { }
         }
@@ -269,11 +303,55 @@ namespace Echo
             using (var usernameFont = new Font("Segoe UI", 12))
             using (var font = new Font("Segoe UI", 9))
             {
+                Rectangle rect = new Rectangle(e.Bounds.Left + 60, e.Bounds.Top + 25, e.Bounds.Width - 60, e.Bounds.Height - 25);
                 e.Graphics.DrawString(msg.SenderUsername, usernameFont, Brushes.Navy, e.Bounds.Left + 60, e.Bounds.Top);
-                e.Graphics.DrawString(msg.Text, font, Brushes.Black, e.Bounds.Left + 60, e.Bounds.Top + 25);
+                e.Graphics.DrawString(msg.Text, font, Brushes.Black, rect);
             }
 
             e.DrawFocusRectangle();
+        }
+
+        void DrawUserItem(object sender, DrawItemEventArgs e)
+        {
+            if (e.Index < 0) return;
+
+            e.DrawBackground();
+            string userId = (string)lstUsers.Items[e.Index];
+
+            // Draw avatar
+            if (clients.TryGetValue(userId, out ClientInfo client))
+            {
+                using (MemoryStream ms = new MemoryStream(client.avatar))
+                using (Image image = Image.FromStream(ms))
+                {
+                    e.Graphics.DrawImage(image, e.Bounds.Left + 5, e.Bounds.Top + 5, 50, 50);
+                }
+            }
+
+            // Draw text
+            using (var usernameFont = new Font("Segoe UI", 12))
+            using (var font = new Font("Segoe UI", 9))
+            {
+                e.Graphics.DrawString(clients[userId].username, usernameFont, Brushes.Navy, e.Bounds.Left + 60, e.Bounds.Top + 15);
+            }
+
+            e.DrawFocusRectangle();
+        }
+
+        void AddUserToList(string userId)
+        {
+            UpdateUI(() =>
+            {
+                lstUsers.Items.Insert(lstUsers.Items.Count, userId);
+            });
+        }
+
+        void RemoveUserFromList(string userId)
+        {
+            UpdateUI(() =>
+            {
+                lstUsers.Items.Remove(userId);
+            });
         }
 
         void AddChatMessage(string sender, string message)
@@ -317,6 +395,21 @@ namespace Echo
                     Disconnect();
                 }
             }
+        }
+
+        private void messagingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            tabControl.SelectedTab = messagingTabPage;
+        }
+
+        private void youtubePlayerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            tabControl.SelectedTab = ytTabPage;
+        }
+
+        private void loginToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            tabControl.SelectedTab = loginTabPage;
         }
     }
 }
