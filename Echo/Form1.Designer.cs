@@ -31,8 +31,12 @@
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.messagingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.loginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.youtubePlayerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ytTabPage = new System.Windows.Forms.TabPage();
+            this.lstYtSearchResults = new System.Windows.Forms.ListBox();
+            this.btnSearchYt = new System.Windows.Forms.Button();
+            this.searchYtTextBox = new System.Windows.Forms.TextBox();
             this.messagingTabPage = new System.Windows.Forms.TabPage();
             this.lstMessages = new System.Windows.Forms.ListBox();
             this.chat_box = new System.Windows.Forms.TextBox();
@@ -45,8 +49,8 @@
             this.pickColorBtn = new System.Windows.Forms.Button();
             this.connectbtn = new System.Windows.Forms.Button();
             this.usernametxt = new System.Windows.Forms.TextBox();
-            this.loginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
+            this.ytTabPage.SuspendLayout();
             this.messagingTabPage.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.loginTabPage.SuspendLayout();
@@ -75,6 +79,14 @@
             this.menuStrip1.TabIndex = 10;
             this.menuStrip1.Text = "menuStrip1";
             // 
+            // loginToolStripMenuItem
+            // 
+            this.loginToolStripMenuItem.ForeColor = System.Drawing.Color.LawnGreen;
+            this.loginToolStripMenuItem.Name = "loginToolStripMenuItem";
+            this.loginToolStripMenuItem.Size = new System.Drawing.Size(49, 20);
+            this.loginToolStripMenuItem.Text = "Login";
+            this.loginToolStripMenuItem.Click += new System.EventHandler(this.loginToolStripMenuItem_Click);
+            // 
             // youtubePlayerToolStripMenuItem
             // 
             this.youtubePlayerToolStripMenuItem.ForeColor = System.Drawing.Color.LawnGreen;
@@ -85,6 +97,9 @@
             // 
             // ytTabPage
             // 
+            this.ytTabPage.Controls.Add(this.lstYtSearchResults);
+            this.ytTabPage.Controls.Add(this.btnSearchYt);
+            this.ytTabPage.Controls.Add(this.searchYtTextBox);
             this.ytTabPage.Location = new System.Drawing.Point(4, 22);
             this.ytTabPage.Name = "ytTabPage";
             this.ytTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -92,6 +107,33 @@
             this.ytTabPage.TabIndex = 1;
             this.ytTabPage.Text = "ytTabPage";
             this.ytTabPage.UseVisualStyleBackColor = true;
+            // 
+            // lstYtSearchResults
+            // 
+            this.lstYtSearchResults.FormattingEnabled = true;
+            this.lstYtSearchResults.Location = new System.Drawing.Point(16, 63);
+            this.lstYtSearchResults.Name = "lstYtSearchResults";
+            this.lstYtSearchResults.Size = new System.Drawing.Size(1180, 563);
+            this.lstYtSearchResults.TabIndex = 2;
+            this.lstYtSearchResults.SelectedIndexChanged += new System.EventHandler(this.lstYtSearchResults_SelectedIndexChanged);
+            // 
+            // btnSearchYt
+            // 
+            this.btnSearchYt.Location = new System.Drawing.Point(1117, 14);
+            this.btnSearchYt.Name = "btnSearchYt";
+            this.btnSearchYt.Size = new System.Drawing.Size(79, 30);
+            this.btnSearchYt.TabIndex = 1;
+            this.btnSearchYt.Text = "Search";
+            this.btnSearchYt.UseVisualStyleBackColor = true;
+            this.btnSearchYt.Click += new System.EventHandler(this.btnSearchYt_Click);
+            // 
+            // searchYtTextBox
+            // 
+            this.searchYtTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.searchYtTextBox.Location = new System.Drawing.Point(16, 11);
+            this.searchYtTextBox.Name = "searchYtTextBox";
+            this.searchYtTextBox.Size = new System.Drawing.Size(1080, 30);
+            this.searchYtTextBox.TabIndex = 0;
             // 
             // messagingTabPage
             // 
@@ -220,14 +262,6 @@
             this.usernametxt.TabIndex = 26;
             this.usernametxt.Text = "Username";
             // 
-            // loginToolStripMenuItem
-            // 
-            this.loginToolStripMenuItem.ForeColor = System.Drawing.Color.LawnGreen;
-            this.loginToolStripMenuItem.Name = "loginToolStripMenuItem";
-            this.loginToolStripMenuItem.Size = new System.Drawing.Size(49, 20);
-            this.loginToolStripMenuItem.Text = "Login";
-            this.loginToolStripMenuItem.Click += new System.EventHandler(this.loginToolStripMenuItem_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -239,6 +273,8 @@
             this.Text = "Form1";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.ytTabPage.ResumeLayout(false);
+            this.ytTabPage.PerformLayout();
             this.messagingTabPage.ResumeLayout(false);
             this.messagingTabPage.PerformLayout();
             this.tabControl.ResumeLayout(false);
@@ -269,6 +305,9 @@
         private System.Windows.Forms.Button connectbtn;
         private System.Windows.Forms.TextBox usernametxt;
         private System.Windows.Forms.ToolStripMenuItem loginToolStripMenuItem;
+        private System.Windows.Forms.TextBox searchYtTextBox;
+        private System.Windows.Forms.Button btnSearchYt;
+        private System.Windows.Forms.ListBox lstYtSearchResults;
     }
 }
 

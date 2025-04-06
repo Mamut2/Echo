@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Net;
 using System.Threading;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace Echo
 {
@@ -27,6 +28,20 @@ namespace Echo
                 SenderUsername = senderUsername;
                 Text = text;
                 TimeStamp = DateTime.Now;
+            }
+        }
+
+        class SearchResult
+        {
+            public string Title { get; }
+            public string Url { get; }
+            public byte[] Thumbnail { get; }
+
+            public SearchResult(string title, string url, byte[] thumbnail)
+            {
+                Title = title;
+                Url = url;
+                Thumbnail = thumbnail;
             }
         }
 
@@ -77,6 +92,20 @@ namespace Echo
             lstUsers.DrawMode = DrawMode.OwnerDrawVariable;
             lstUsers.DrawItem += DrawUserItem;
             lstUsers.MeasureItem += (s, e) => e.ItemHeight = 60;
+
+            // YtPlayer
+            lstYtSearchResults.DrawMode = DrawMode.OwnerDrawVariable;
+            lstYtSearchResults.DrawItem += DrawSearchResultItem;
+            lstYtSearchResults.MeasureItem += (s, e) => { e.ItemHeight = 160; };
+            YtPlayer.OnVideoInfoReceived += (string title, string url, byte[] thumbnailData) => {
+                using (MemoryStream ms = new MemoryStream(thumbnailData))
+                using (Bitmap resized = new Bitmap(Image.FromStream(ms), 150 * 16/9, 150))
+                using (MemoryStream resizedMs = new MemoryStream())
+                {
+                    resized.Save(resizedMs, ImageFormat.Png);
+                    AddSearchResult(title, url, resizedMs.ToArray());
+                }
+            };
         }
 
         private void connectbtn_Click(object sender, EventArgs e)
@@ -128,8 +157,8 @@ namespace Echo
                     UpdateUI(() => connectbtn.Text = "Disconnect");
 
                     voip = new VoipNode(port + 1);
-                    voip.Start();
                     voip.LogMessage += (string msg) => { Console.WriteLine(msg); };
+                    voip.Start();
                 }
                 catch
                 {
@@ -282,6 +311,29 @@ namespace Echo
             catch { }
         }
 
+        void DrawSearchResultItem(object sender, DrawItemEventArgs e)
+        {
+            if (e.Index < 0) return;
+
+            e.DrawBackground();
+            var result = (SearchResult)lstYtSearchResults.Items[e.Index];
+
+            // Draw thumbnail
+            using (MemoryStream ms = new MemoryStream(result.Thumbnail))
+            using (Image image = Image.FromStream(ms))
+            {
+                e.Graphics.DrawImage(image, e.Bounds.Left + 5, e.Bounds.Top + 5, 150 * 16/9, 150);
+            }
+
+            // Draw text
+            using (var font = new Font("Segoe UI", 12))
+            {
+                e.Graphics.DrawString(result.Title, font, Brushes.Navy, e.Bounds.Left + 300, e.Bounds.Top + 10);
+            }
+
+            e.DrawFocusRectangle();
+        }
+
         void DrawMessageItem(object sender, DrawItemEventArgs e)
         {
             if (e.Index < 0) return;
@@ -336,6 +388,18 @@ namespace Echo
             }
 
             e.DrawFocusRectangle();
+        }
+
+        void AddSearchResult(string title, string url, byte[] thumbnailData)
+        {
+            UpdateUI(() =>
+            {
+                using (MemoryStream ms = new MemoryStream(thumbnailData))
+                using (Image image = Image.FromStream(ms))
+                {
+                    lstYtSearchResults.Items.Add(new SearchResult(title, url, thumbnailData));
+                }
+            });
         }
 
         void AddUserToList(string userId)
@@ -410,6 +474,25 @@ namespace Echo
         private void loginToolStripMenuItem_Click(object sender, EventArgs e)
         {
             tabControl.SelectedTab = loginTabPage;
+        }
+
+        private void btnSearchYt_Click(object sender, EventArgs e)
+        {
+            UpdateUI(() => lstYtSearchResults.Items.Clear());
+            Task.Run(async () =>
+            {
+                await YtPlayer.SearchAsync(searchYtTextBox.Text.Trim());
+            });
+        }
+
+        private void lstYtSearchResults_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var result = (SearchResult)lstYtSearchResults.SelectedItem;
+            Task.Run(async () =>
+            {
+                YtPlayer.StopPlayback();
+                await YtPlayer.PlayAsync(result.Url);
+            });
         }
     }
 }
